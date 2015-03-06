@@ -1,0 +1,8 @@
+primero git clone de mi repo en github
+despues git add y nombre del archivo
+git status y te dice el estado
+git commit -s -m "Pones un mensaje para informar" lo prepara para subirse a la repo
+git show muestra el parche que has subido
+git format-patch -1 crea parches (El nº puede ser cualquiera)
+git push sube el cambio al repo
+git pull (Trae los cambios)
