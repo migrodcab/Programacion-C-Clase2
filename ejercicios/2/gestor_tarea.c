@@ -1,6 +1,23 @@
 #include "gestor_tarea.h"
 #include <string.h>
 
+static int binsearch(struct tarea *lista[], int size, struct tarea *t)
+{
+	int low = 0;
+	int high = size - 1;
+	int prioridad = curso_tarea_attr_get_u32(t, CURSO_TAREA_ATTR_PRIORIDAD);
+	if (prioridad > curso_tarea_attr_get_u32(lista[high], CURSO_TAREA_ATTR_PRIORIDAD))
+		return size;
+	while (high > low) {
+		int mid = (low + high) /2;
+		if (curso_tarea_attr_get_u32(lista[mid], CURSO_TAREA_ATTR_PRIORIDAD) > prioridad)
+			high = mid;
+		else
+			low = mid + 1;
+	}
+	return low;
+}
+
 struct gestor_tarea {
 	struct tarea	*tareas[10];
 	uint32_t	num_tareas;
@@ -24,16 +41,20 @@ void curso_gestor_free(struct gestor_tarea *ges)
 void curso_gestor_attr_unset_tarea(struct gestor_tarea *ges,
 					  uint32_t pos)
 {
-	if (pos > 0 && pos > ges->num_tareas)
+	if (pos < 0 || pos > ges->num_tareas)
 		return;
 
-	ges->num_tareas--;
 	curso_tarea_free(ges->tareas[pos]);
+	int i;
+	for ( i = pos; i < ges->num_tareas; i++) 
+		ges->tareas[i] = ges->tareas[i+1];
+	ges->num_tareas--;
 }
 
 static void curso_gestor_set_data(struct gestor_tarea *ges,
 					 uint16_t attr, const void *data)
 {
+	int i, pos;
 	if (attr > CURSO_GESTOR_ATTR_MAX)
 		return;
 
@@ -43,8 +64,15 @@ static void curso_gestor_set_data(struct gestor_tarea *ges,
 			printf("La lista de tareas esta llena\n");
 			break;
 		}
+		if (ges->num_tareas > 0)
+			pos = binsearch(ges->tareas, ges->num_tareas, (struct tarea *)data);
+		else
+			pos = 0;
 
-		ges->tareas[ges->num_tareas] = (struct tarea *)data;
+		for (i = ges->num_tareas - 1; i >= pos; i--)
+			ges->tareas[i+1] = ges->tareas[i];
+
+		ges->tareas[pos] = (struct tarea *)data;
 		ges->num_tareas++;
 		break;
 	}
