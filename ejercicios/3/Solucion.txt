@@ -1,0 +1,6 @@
+Ejercicio 3:
+
+	1.- Se libera el coche antes de imprimir la lista
+	2.- No se liberan ni los coches ni el concesionario
+	3.- El tamaño del buffer es 5, pero se esta pasando un tamaño de 50
+	4.- No se ha reservado memoria para el coche con alloc
